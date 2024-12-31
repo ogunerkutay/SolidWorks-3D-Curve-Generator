@@ -1,0 +1,53 @@
+Option Explicit
+
+Sub Main()
+    Dim swApp As SldWorks.SldWorks
+    Dim swModel As ModelDoc2
+    Dim swSketchMgr As SketchManager
+    Dim sw3DSketch As Sketch
+    Dim t As Double
+    Dim x As Double, y As Double, z As Double
+    Dim numPoints As Long
+    Dim deltaT As Double
+    Dim i As Long
+
+    ' SolidWorks uygulamasını al
+    Set swApp = Application.SldWorks
+    Set swModel = swApp.ActiveDoc
+
+    If swModel Is Nothing Then
+        MsgBox "Lütfen bir parça belgesi açın.", vbCritical
+        Exit Sub
+    End If
+
+    If swModel.GetType() <> swDocPART Then
+        MsgBox "Lütfen bir parça belgesi açın.", vbCritical
+        Exit Sub
+    End If
+
+    ' Parametreler
+    numPoints = 100
+    deltaT = 10 / numPoints ' t aralığı (0'dan 10'a)
+
+    ' 3D Sketch oluştur
+    Set swSketchMgr = swModel.SketchManager
+    swSketchMgr.Insert3DSketch True
+    Set sw3DSketch = swModel.GetActiveSketch
+
+    ' Noktaları oluştur ve sketch'e ekle
+    For i = 0 To numPoints
+        t = i * deltaT
+        x = x + (Cos(t ^ 2) * deltaT)
+        y = y + (Sin(t ^ 2) * deltaT)
+        z = 0 ' Z ekseni sabit, gerekirse düzenleyebilirsiniz
+
+        ' Sketch'e nokta ekle
+        swSketchMgr.CreatePoint x / 1000, y / 1000, z / 1000 ' mm'den metreye dönüştür
+    Next i
+
+    ' Sketch'i kapat
+    swSketchMgr.Insert3DSketch True
+    swModel.EditRebuild3
+
+    MsgBox "Eğri başarıyla oluşturuldu!", vbInformation
+End Sub
